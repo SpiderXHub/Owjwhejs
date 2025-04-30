@@ -1,0 +1,383 @@
+local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/tbao143/Library-ui/refs/heads/main/Redzhubui"))()
+
+local Window = redzlib:MakeWindow({
+    Title = "SpiderXHub | Universal",
+    SubTitle = "by @SpiderScriptRB ☢️",
+    SaveFolder = "UniversalScriptConfig"
+})
+
+Window:AddMinimizeButton({
+    Button = {
+        Image = "rbxassetid://71014873973869",
+        BackgroundTransparency = 0
+    },
+    Corner = {
+        CornerRadius = UDim.new(0, 8)
+    }
+})
+
+customSpeed = 16
+customJump = 50
+customGravity = 196.2
+local speedEnabled = false
+local jumpEnabled = false
+local gravityEnabled = false
+local infiniteJumpEnabled = false
+local jumpConnection
+
+local Tab1 = Window:MakeTab({"Функции игрока", "cherry"})
+
+local Section = Tab1:AddSection({"Изменение скорости"})
+
+local Toggle1 = Tab1:AddToggle({
+    Name = "Enable Speed walk",
+    Description = "Use this to toggle your <font color='rgb(0, 0, 225)'>speed</font>",
+    Default = false 
+})
+Toggle1:Callback(function(Value)
+    speedEnabled = Value
+    local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = Value and customSpeed or 16
+    else
+        error("Humanoid not found.")
+    end
+end)
+
+Tab1:AddTextBox({
+    Name = "Speed Modifier Textbox",
+    Description = "Use this to change your <font color='rgb(0, 0, 225)'>speed</font>",
+    PlaceholderText = "Введите силу скорости цыфрой",
+    Callback = function(Value)
+        local speedValue = tonumber(Value)
+        if not speedValue then
+            error("ошибка. Пожалуйства введите цыфру что бы изменить скорость.")
+        end
+        customSpeed = speedValue
+
+        if speedEnabled then
+            local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = customSpeed
+            end
+        end
+    end
+})
+
+local Section = Tab1:AddSection({"Изменение прыжка"})
+
+local Toggle1 = Tab1:AddToggle({
+    Name = "Enable Jump Power",
+    Description = "Use this to toggle your <font color='rgb(0, 255, 255)'>JumpPower</font>",
+    Default = false 
+})
+Toggle1:Callback(function(Value)
+    jumpEnabled = Value
+    local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.JumpPower = Value and customJump or 50
+    else
+        error("Ошибка. Пожалуйста введите цыфру что бы изменить прыжок.")
+    end
+end)
+
+Tab1:AddTextBox({
+    Name = "JumpPower Modifier Textbox",
+    Description = "Use this to change your <font color='rgb(0, 255, 255)'>JumpPower</font>",
+    PlaceholderText = "Введите силу прыжка цыфрой",
+    Callback = function(Value)
+        local jumpValue = tonumber(Value)
+        if not jumpValue then
+            error("Invalid input. Please enter a valid number for JumpPower.")
+        end
+        customJump = jumpValue
+
+        if jumpEnabled then
+            local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.JumpPower = customJump
+            end
+        end
+    end
+})
+
+local Section = Tab1:AddSection({"Изменение гравитации"})
+
+local Toggle2 = Tab1:AddToggle({
+    Name = "Enable Gravity Modification",
+    Description = "Use this to toggle your <font color='rgb(128, 128, 128)'>Gravity</font>",
+    Default = false 
+})
+:Callback(function(Value)
+    gravityEnabled = Value
+    game.Workspace.Gravity = Value and customGravity or 196.2
+end)
+ 
+Tab1:AddTextBox({
+    Name = "Gravity Modifier Textbox",
+    Description = "Use this to change your <font color='rgb(128, 128, 128)'>Gravity</font>",
+    PlaceholderText = "Введите силу гравитации цыфрой",
+    Callback = function(Value)
+        local gravValue = tonumber(Value)
+        if not gravValue then
+            error("Invalid input. Please enter a valid number for Gravity.")
+        end
+        customGravity = gravValue
+
+        if gravityEnabled then
+            game.Workspace.Gravity = customGravity
+        end
+    end
+})
+
+local Section = Tab1:AddSection({"Остальные функции"})
+
+local Toggle1 = Tab1:AddToggle({
+    Name = "Бесконечный прыжок",
+    Description = "Use this to toggle <font color='rgb(255, 0, 0)'>Infinite Jump</font>",
+    Default = false
+})
+:Callback(function(Value)
+    infiniteJumpEnabled = Value
+    if Value then
+        if not jumpConnection then
+            jumpConnection = game:GetService("UserInputService").JumpRequest:Connect(function()
+                if infiniteJumpEnabled then
+                    local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                    if humanoid then
+                        humanoid:ChangeState("Jumping")
+                    end
+                end
+            end)
+        end
+    else
+        if jumpConnection then
+            jumpConnection:Disconnect()
+            jumpConnection = nil
+        end
+    end
+end)
+local Toggle1 = Tab1:AddToggle({
+    Name = "Проходить сквозь стен",
+    Description = "Use this to toggle <font color='rgb(255, 0, 0)'>Noclip</font>",
+    Default = false
+})
+
+local Noclip = nil
+local Clip = nil
+
+function noclip()
+	Clip = false
+	local function Nocl()
+		if Clip == false and game.Players.LocalPlayer.Character ~= nil then
+			for _,v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+				if v:IsA('BasePart') and v.CanCollide and v.Name ~= floatName then
+					v.CanCollide = false
+				end
+			end
+		end
+		wait(0.21) -- basic optimization
+	end
+	Noclip = game:GetService('RunService').Stepped:Connect(Nocl)
+end
+
+function clip()
+	if Noclip then Noclip:Disconnect() end
+	Clip = true
+end
+
+noclip() -- to toggle noclip() and clip()
+
+Tab1:AddButton({"Swimming Fly", function(Value)
+loadstring(game:HttpGet('https://raw.githubusercontent.com/FreeRobloxScripts1/FE-Swim/main/OP-FE-Script'))()
+end})
+Tab1:AddButton({"Fly Player", function(Value)
+loadstring(game:HttpGet(('https://pastefy.app/M0N30XXG/raw'),true))()
+end})
+
+Tab1:AddButton({"Anti-Fling", function(Value)
+
+-- [ Services ] --
+local Services = setmetatable({}, {__index = function(Self, Index)
+local NewService = game.GetService(game, Index)
+if NewService then
+Self[Index] = NewService
+end
+return NewService
+end})
+
+-- [ LocalPlayer ] --
+local LocalPlayer = Services.Players.LocalPlayer
+
+-- // Functions \\ --
+local function PlayerAdded(Player)
+   local Detected = false
+   local Character;
+   local PrimaryPart;
+
+   local function CharacterAdded(NewCharacter)
+       Character = NewCharacter
+       repeat
+           wait()
+           PrimaryPart = NewCharacter:FindFirstChild("HumanoidRootPart")
+       until PrimaryPart
+       Detected = false
+   end
+
+   CharacterAdded(Player.Character or Player.CharacterAdded:Wait())
+   Player.CharacterAdded:Connect(CharacterAdded)
+   Services.RunService.Heartbeat:Connect(function()
+       if (Character and Character:IsDescendantOf(workspace)) and (PrimaryPart and PrimaryPart:IsDescendantOf(Character)) then
+           if PrimaryPart.AssemblyAngularVelocity.Magnitude > 50 or PrimaryPart.AssemblyLinearVelocity.Magnitude > 100 then
+               if Detected == false then
+                   game.StarterGui:SetCore("ChatMakeSystemMessage", {
+                       Text = "Fling Exploit detected, Player: " .. tostring(Player);
+                       Color = Color3.fromRGB(255, 200, 0);
+                   })
+               end
+               Detected = true
+               for i,v in ipairs(Character:GetDescendants()) do
+                   if v:IsA("BasePart") then
+                       v.CanCollide = false
+                       v.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                       v.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                       v.CustomPhysicalProperties = PhysicalProperties.new(0, 0, 0)
+                   end
+               end
+               PrimaryPart.CanCollide = false
+               PrimaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+               PrimaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+               PrimaryPart.CustomPhysicalProperties = PhysicalProperties.new(0, 0, 0)
+           end
+       end
+   end)
+end
+
+-- // Event Listeners \\ --
+for i,v in ipairs(Services.Players:GetPlayers()) do
+   if v ~= LocalPlayer then
+       PlayerAdded(v)
+   end
+end
+Services.Players.PlayerAdded:Connect(PlayerAdded)
+
+local LastPosition = nil
+Services.RunService.Heartbeat:Connect(function()
+   pcall(function()
+       local PrimaryPart = LocalPlayer.Character.PrimaryPart
+       if PrimaryPart.AssemblyLinearVelocity.Magnitude > 250 or PrimaryPart.AssemblyAngularVelocity.Magnitude > 250 then
+           PrimaryPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+           PrimaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+           PrimaryPart.CFrame = LastPosition
+
+           game.StarterGui:SetCore("ChatMakeSystemMessage", {
+               Text = "You were flung. Neutralizing velocity.";
+               Color = Color3.fromRGB(255, 0, 0);
+           })
+       elseif PrimaryPart.AssemblyLinearVelocity.Magnitude < 50 or PrimaryPart.AssemblyAngularVelocity.Magnitude > 50 then
+           LastPosition = PrimaryPart.CFrame
+       end
+   end)
+end)
+
+end})
+
+local Section = Tab1:AddSection({"18+ скрипты"})
+Tab1:AddButton({
+    Name = "Shift Lock",
+    Description = "Скрипт который вкл Шифт лок, удобен для использование",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/XCX7WBWL"))()
+    end
+}) 
+
+local Tab1 = Window:MakeTab({"Троллинг фунции", "cat"})
+local Section = Tab1:AddSection({"Откидывание игроков"})
+Tab1:AddButton({
+    Name = "<font color='rgb(255, 0, 0)'>Fling Player</font>",
+    Description = "с помощью этого скрипта вы можете выкидывать игроков за карту, притрагиваясь к ним",
+    Callback = function()
+loadstring(game:HttpGet("https://pastebin.com/raw/rfKaavP3"))()
+end
+}) 
+Tab1:AddButton({
+    Name = "<font color='rgb(255, 0, 0)'>Fling Player</font>",
+    Description = "с помощью этого скрипта вы можете выкидывать игроков за карту, написав ник",
+    Callback = function()
+loadstring(game:HttpGet("https://pastebin.com/raw/gMSmu1WH"))()
+end
+}) 
+
+local Section = Tab1:AddSection({"18+ скрипты"})
+Tab1:AddButton({
+    Name = "Др0чка (R6)",
+    Description = "с помощью этого скрипта вы сможете рукой махать",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastefy.app/wa3v2Vgm/raw"))()
+    end
+}) 
+Tab1:AddButton({
+    Name = "Др0чка (R15)",
+    Description = "с помощью этого скрипта вы сможете рукой махать",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastefy.app/YZoglOyJ/raw"))()
+    end
+}) 
+
+local Section = Tab1:AddSection({"Скрипты для чата"})
+Tab1:AddButton({
+    Name = "Cleaning Chat",
+    Description = "скрипт очищающий чат, в принципе ничего такого",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Avtor1zaTion/FE-Chat-Cleaner/refs/heads/main/FE%20Chat%20Cleaner"))()
+end
+})
+
+Tab1:AddButton({
+    Name = "Draw Chat",
+    Description = "с помощью этого скрипта вы можете рисовать :D",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ocfi/Choose-ARt-able-remove/main/wassdaadwasda"))()
+end
+})
+
+Tab1:AddButton({
+    Name = "Spy chat",
+    Description = "с помощью этого скрипта вы можете рисовать :D",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Avtor1zaTion/Chat-Spy/main/Chat%20Spy"))()
+
+local message = Instance.new(”Message”)
+message.Parent = game.Workspace
+message.Text = “/e spy”
+wait(3)
+message:Remove()
+print("/e spy")
+
+end
+})
+
+local Tab1 = Window:MakeTab({"Development X", "code"})
+Tab1:AddButton({
+    Name = "<font color='rgb(255, 0, 0)'>Infinite Yield</font>",
+    Description = "Loads Infinite Yield.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+    end
+}) 
+
+Tab1:AddButton({
+    Name = "<font color='rgb(128, 128, 128)'>Dex Explorer</font>",
+    Description = "Loads Dex Explorer.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/peyton2465/Dex/master/out.lua"))()
+    end
+})
+
+Tab1:AddButton({
+    Name = "<font color='rgb(243, 207, 155)'>Part Name Detector</font>",
+    Description = "Loads Part Name.",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer352/Test4/refs/heads/main/Part%20Name%20Detector'))()
+    end
+})
